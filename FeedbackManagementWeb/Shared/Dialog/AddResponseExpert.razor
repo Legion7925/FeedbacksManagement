@@ -1,0 +1,127 @@
+﻿@using Domain.Entities;
+@using FeedbackManagementWeb.Services;
+@using Infrastructure.Exceptions;
+
+
+<MudRTLProvider RightToLeft=true>
+    <MudDialog>
+        <DialogContent>
+            <MudGrid>
+                <MudItem md="6" xs="12" sm="12">
+                    <div>
+
+                    </div>
+                    <div class="d-flex">
+                        <MudSelect Class="my-3" T="string" @bind-Value="_expertName" Label="متخصص">
+                            @foreach (var item in expertList)
+                            {
+                                <MudSelectItem Value="@(item.FirstName+" "+item.LastName)">@item.FirstName @item.LastName</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudIconButton Icon="@Icons.Material.Filled.PersonSearch" Color="Color.Primary" Edge="Edge.End" OnClick="ChoiceExpert" />
+                    </div>
+                </MudItem>
+                <MudItem md="12" xs="12" sm="12">
+                    <MudTextField T="string" @bind-Value=answerBase.Respond Label="پاسخ" Variant="Variant.Outlined" Lines="7" />
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton StartIcon="@Icons.Filled.DoNotDisturbOn" Color=Color.Error OnClick="Cancel">لغو</MudButton>
+            <MudButton StartIcon="@Icons.Filled.Done" Color="Color.Success" OnClick="SubmitResponse">ثبت پاسخ</MudButton>
+        </DialogActions>
+    </MudDialog>
+</MudRTLProvider>
+
+
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = new MudDialogInstance();
+
+    [Inject]
+    private IExpertService expertService { get; set; } = default!;
+
+    [Inject]
+    private IAnswerService answerService { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject]
+    public IDialogService DialogService { get; set; } = default!;
+
+
+    [Parameter]
+    public int IdFeedback { get; set; }
+
+    IEnumerable<Expert> expertList = new List<Expert>();
+
+    public AnsowerBase answerBase = new();
+    private string _expertName = string.Empty;
+
+    void Cancel() => MudDialog.Cancel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetListExpert();
+    }
+
+    private async Task SubmitResponse()
+    {
+        try
+        {
+            await answerService.AddAnswerForFeedback(new AnsowerBase
+                {
+                    FkIdExpert = expertList.FirstOrDefault(i => i.FirstName + " " + i.LastName == _expertName)?.Id ?? 0,
+                    FkIdFeedback = IdFeedback,
+                    Respond = answerBase.Respond,
+                    RespondDate = DateTime.Now
+                });
+            Snackbar.Add("پاسخ با موفقیت ثبت شد", Severity.Success);
+            MudDialog.Close();
+            StateHasChanged();
+        }
+        catch (AppException ax)
+        {
+            Snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("در ثبت پاسخ خطایی رخ داده است", Severity.Error);
+        }
+    }
+
+    private async Task GetListExpert()
+    {
+        try
+        {
+            expertList = await expertService.GetExperts();
+            StateHasChanged();
+        }
+        catch (AppException ax)
+        {
+            Snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("در واکشی اطلاعات خطایی رخ داده است", Severity.Error);
+        }
+    }
+
+    private async Task ChoiceExpert()
+    {
+        DialogOptions options = new DialogOptions() { CloseOnEscapeKey = false, DisableBackdropClick = true, MaxWidth = MaxWidth.Large, CloseButton = true };
+        var choiceExpert = DialogService.Show<ChoiceKindOfExpertDialog>("", options);
+        var result = await choiceExpert.Result;
+        if (!result.Canceled)
+        {
+            var expert = expertList.FirstOrDefault(i => i.Id == Convert.ToInt32(result.Data));
+            _expertName = expert!.FirstName + " " + expert!.LastName;
+            StateHasChanged();
+        }
+
+    }
+
+}

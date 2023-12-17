@@ -1,0 +1,166 @@
+﻿@page "/ReportOneFeedback"
+@using Domain.Entities;
+@using Domain.Model;
+
+<MudTabs Class="m-3" Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+    <MudTabPanel Text="اطلاعات اصلی">
+        <MudGrid Class="my-3" Elevation="3" dir="rtl">
+            <MudItem xs="6" sm="6">
+                <div class="d-flex flex-grow-1 gap-4">
+                    <MudTextField Class="mx-1" @bind-Value="serialNumber" Label="شماره مورد" Variant="Variant.Text" />
+                    <MudButton Class="mx-1" Variant="Variant.Filled" Color="Color.Primary" OnClick="GetReport">گزارش</MudButton>
+                </div>
+            </MudItem>
+            <MudItem xs="6" sm="6">
+
+            </MudItem>
+            <MudItem xs=3 sm=3>
+                <MudText Class="my-5" Typo="Typo.body1">عنوان : @Feedback.Title</MudText>
+                @*<MudText Class="my-5" Typo="Typo.body1">تگ های موضوعی : @Feedback.TagsUs</MudText>*@
+                <MudText Class="my-5" Typo="Typo.body1">محصول : @Feedback.ProductName</MudText>
+                <MudText Class="my-5" Typo="Typo.body1">نام مشتری : @Feedback.CustomerName</MudText>
+                <MudText Class="my-5" Typo="Typo.body1">منشاء : @Feedback.SourceTranslate</MudText>
+            </MudItem>
+            <MudItem xs=3 sm=3>
+                <MudText Class="my-5" Typo="Typo.body1">وضعیت : @Feedback.StatusTranslate</MudText>
+                <MudText Class="my-5" Typo="Typo.body1">اولویت : @Feedback.PriortyTranslate</MudText>
+                <MudText Class="my-5" Typo="Typo.body1">تاریخ ایجاد : @Feedback.CreatedDateFa</MudText>
+                <MudText Class="my-5" Typo="Typo.body1">تاریخ پاسخ : @Feedback.RespondDateFa</MudText>
+                <MudText Class="my-5" Typo="Typo.body1">شرح مورد : @Feedback.Description</MudText>
+            </MudItem>
+            <MudItem xs="12" sm="12">
+            </MudItem>
+        </MudGrid>
+    </MudTabPanel>
+    <MudTabPanel Text="پاسخ">
+        <MudGrid>
+            <MudItem md="6" xs="12" sm="6">
+                <div class="d-flex flex-row flex-grow-1 gap-4">
+                    <MudTextField Class="mx-1" @bind-Value="respondPattern" Label="الگوی پاسخ" Variant="Variant.Text" />
+                    <MudButton Class="mx-1" Variant="Variant.Filled" Color="Color.Primary" OnClick="GetReport">انتخاب</MudButton>
+                </div>
+            </MudItem>
+            <MudItem md="5" xs=9 sm=4 Class="d-flex flex-row-reverse">
+                <MudButtonGroup Class="align-center" Color="Color.Primary" Variant="Variant.Outlined" OverrideStyles="false">
+                    <MudButton Variant=Variant.Outlined Color=Color.Info>کپی از پاسخ مورد</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color=Color.Primary>ارائه مورد های مشابه</MudButton>
+                </MudButtonGroup>
+            </MudItem>
+            <MudItem md="1" sm="2" xs="3" Class="d-flex flex-row-reverse">
+                <MudFab Icon="@Icons.Material.Outlined.Add" Color="Color.Success" Size="Size.Medium" OnClick="OpenAddResponseDialog" />
+            </MudItem>
+        </MudGrid>
+
+        <MudTable Items="@answers" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">پاسخ ها</MudText>
+                <MudSpacer />
+            </ToolBarContent>
+
+            <HeaderContent>
+                <MudTh>تاریخ</MudTh>
+                <MudTh>پاسخ</MudTh>
+                <MudTh>عملیات</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="تاریخ">@context.RespondDateFa</MudTd>
+                <MudTd DataLabel="پاسخ">@context.Respond</MudTd>
+                <MudTd DataLabel="عملیات">
+                    @if (context.IsConfirmed)
+                    {
+                        <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled=true>تایید پاسخ</MudButton>
+                        <MudTooltip Text="پاسخ تایید شده" Placement=Placement.Bottom>
+                            <MudIconButton Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success"></MudIconButton>
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <MudButton Color="Color.Primary" Variant="Variant.Outlined" OnClick="(()=> ConfirmAnswer(context.Id))">تایید پاسخ</MudButton>
+                    }
+
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudTabPanel>
+    <MudTabPanel Text="ارجاع">
+        <MudGrid>
+            <MudItem md="3" xs="12" sm="12">
+                <MudText Class="my-4" Typo="Typo.body1">تاریخ ارجاع : @*@Feedback.ReferralDateFa*@</MudText>
+            </MudItem>
+            <MudItem md="6" xs="12" sm="12" Class="d-flex flex-row-reverse">
+                <MudButtonGroup Class="align-center" Color="Color.Primary" Variant="Variant.Outlined" OverrideStyles="false">
+                    <MudButton Variant=Variant.Outlined Color=Color.Primary OnClick="OpenSubmitToExpertDialog">ارجاع به متخصص</MudButton>
+                    <MudButton Variant=Variant.Outlined Color=Color.Success OnClick="OpenSubmitToExpertGroupDialog">ارجاع به گروه متخصصین</MudButton>
+                </MudButtonGroup>
+            </MudItem>
+        </MudGrid>
+        <MudTable Class="m-3" Items="Feedback.ExpertsOrGroupExpertsList" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info" Striped="true" >
+            <HeaderContent>
+                <MudTh>نام</MudTh>
+                <MudTh>تاریخ ارجاع</MudTh>
+                <MudTh>تاریخ برگشت</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="نام">@context.Name</MudTd>
+                <MudTd DataLabel="تاریخ ارجاع">@context.RefrralDateFa</MudTd>
+                <MudTd DataLabel="تاریخ برگشت">@context.RefrralDateFa</MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText>داده ای یافت نشد</MudText>
+            </NoRecordsContent>
+
+        </MudTable>
+        
+    </MudTabPanel>
+    <MudTabPanel Text="اطلاعات تکمیلی">
+        <div class="m-3">
+            <MudFab Class="my-3" StartIcon="@Icons.Material.Outlined.Add" Color="Color.Success" Size="Size.Medium" OnClick="OpenAddTagDialog" />
+            <MudTable Items="Tags" T="Tag" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                <HeaderContent>
+                    <MudTh>کد</MudTh>
+                    <MudTh>تگ</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="کد">@context.Id</MudTd>
+                    <MudTd DataLabel="تگ">@context.Name</MudTd>
+                    <MudTd>
+                        <MudTooltip Text="حذف" Placement="Placement.Bottom">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="(()=> OpenDeleteTagDialog(context.Id))"></MudIconButton>
+                        </MudTooltip>
+                        <MudTooltip Text="ویرایش" Placement="Placement.Bottom">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info" OnClick="(()=> OpenEditTagDialog(context.Id , context))"></MudIconButton>
+                        </MudTooltip>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </div>
+    </MudTabPanel>
+    <MudTabPanel Text="مورد های مشابه">
+        <MudGrid>
+            <MudItem md="6" xs="6" sm="6">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary">ارایه مورد های مشابه</MudButton>
+            </MudItem>
+            <MudItem md="6" xs="6" sm="6" Class="d-flex flex-row-reverse">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary">تایید مورد مشابه</MudButton>
+            </MudItem>
+        </MudGrid>
+        <MudTable Items="Tags" T="Tag" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+            <HeaderContent>
+                <MudTh>موضوع</MudTh>
+                <MudTh>نوع محصول یا خدمات</MudTh>
+                <MudTh>مشتری</MudTh>
+                <MudTh>زبان</MudTh>
+                <MudTh>تاریخ</MudTh>
+                <MudTh>درصد شباهت</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                
+            </RowTemplate>
+        </MudTable>
+    </MudTabPanel>
+</MudTabs>
+
+
+

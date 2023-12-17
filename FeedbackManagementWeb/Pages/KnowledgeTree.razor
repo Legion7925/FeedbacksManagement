@@ -1,0 +1,41 @@
+﻿@page "/KnowledgeTree"
+@using Domain.Entities;
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+    <MudGrid Style="align-items:baseline">
+        <MudItem xs=6 sm=6 Class="d-flex flex-row">
+            <MudFab StartIcon="@Icons.Material.Outlined.Add" Color="Color.Success" Size="Size.Medium" OnClick="OpenAddRootDialog" />
+        </MudItem>
+        <MudItem xs=6 sm=6 Class="d-flex flex-row-reverse">
+        </MudItem>
+    </MudGrid>
+
+    <MudPaper>
+        <MudTreeView Items="treeList" Class="m-4">
+            <ItemTemplate>
+                <MudTreeViewItem T="KnowledgeTreeReport" @bind-Expanded="@context.IsExpanded" Items="@context.KnowledgeTreeChildren" Value="@context" Text="@context.Name">
+                    <Content>
+                        <MudTooltip Text="شاخه جدید">
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="(()=> OpenAddBranchDialog(context.Id))"></MudIconButton>
+                        </MudTooltip>
+                        <MudTooltip Text="ویرایش شاخه">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="(()=> OpenEditBranchDialog(context))"></MudIconButton>
+                        </MudTooltip>
+                        <MudTooltip Text="حذف شاخه">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="(()=> OpenDeleteBranchDialog(context))"></MudIconButton>
+                        </MudTooltip>
+                        @if (context.ParentId != null)
+                        {
+                            <MudTooltip Text="انتقال شاخه">
+                                <MudIconButton Icon="@Icons.Material.Filled.ChangeCircle" OnClick="(()=> OpenChangeParentDialog(context))"></MudIconButton>
+                            </MudTooltip>
+                        }
+                        <MudTreeViewItemToggleButton @bind-Expanded="@context.IsExpanded" Visible="@context.HasChild" />
+                        <MudLink OnClick="(()=>OpenBranchDetailsDialog(context.Id))">@context.Name</MudLink>
+                    </Content>
+                </MudTreeViewItem>
+            </ItemTemplate>
+        </MudTreeView>
+    </MudPaper>
+
+</MudContainer>

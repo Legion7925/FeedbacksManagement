@@ -1,0 +1,60 @@
+﻿@using Domain.Entities;
+@using Domain.Shared.Enums;
+@using FeedbackManagementWeb.Interface;
+@using Infrastructure.Exceptions;
+@inject ISnackbar snackbar
+@inject ICaseService CaseService
+
+<MudRTLProvider RightToLeft="true">
+    <MudDialog>
+
+        <DialogContent>
+            <MudTextField Class="my-3" @bind-Value="caseBase.Title" Label="عنوان" Variant="Variant.Text"/>
+
+            <MudTextField Class="" @bind-Value="caseBase.Description" Label="توضیحات" Variant="Variant.Text"></MudTextField>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color=Color.Error OnClick="Cancel" Class="mt-3">انصراف</MudButton>
+            <MudButton Color="Color.Success" OnClick="SubmitCase" Class="mt-3">ثبت مورد</MudButton>
+        </DialogActions>
+
+    </MudDialog>
+</MudRTLProvider>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = new MudDialogInstance();
+
+    private CaseBase caseBase = new();
+
+    protected override Task OnInitializedAsync()
+    {
+        return base.OnInitializedAsync();
+    }
+
+    private async Task SubmitCase()
+    {
+        try
+        {
+            caseBase.Resources = string.Empty;
+            caseBase.FkIdProduct = 3;
+            caseBase.FkIdCustomer = 3;
+            caseBase.Source = Source.Site;
+            caseBase.SourceAddress = "ثبت شده توسط ادمین";
+            await CaseService.AddCase(caseBase);
+            MudDialog.Close(DialogResult.Ok(true));
+            snackbar.Add("مورد با موفقیت ثبت شد", Severity.Success);
+        }
+        catch (AppException ax)
+        {
+            snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+}

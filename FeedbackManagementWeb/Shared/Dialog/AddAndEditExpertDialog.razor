@@ -1,0 +1,221 @@
+﻿@using Domain.Entities;
+@using Domain.Shared.Enums;
+@using FeedbackManagementWeb.Helper;
+@using FeedbackManagementWeb.Services;
+@using Infrastructure.Exceptions;
+
+
+<MudRTLProvider RightToLeft=true>
+    <MudDialog>
+        <DialogContent>
+            <MudForm>
+                <MudGrid>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudTextField @bind-Value="SelectedExpert.FirstName" Label="نام" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudTextField @bind-Value="SelectedExpert.LastName" Label="نام خانوادگی" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudTextField @bind-Value="SelectedExpert.NationalCode" Label="کد ملی" Variant="Variant.Outlined" InputType="InputType.Number" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudTextField @bind-Value="SelectedExpert.PassportNumber" Label="شماره پاسپورت" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudTextField @bind-Value="SelectedExpert.Nationality" Label="ملیت" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudTextField @bind-Value="SelectedExpert.Language" Label="زبان" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudTextField @bind-Value="SelectedExpert.FieldOfStudy" Label="رشته تحصیلی" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudTextField @bind-Value="SelectedExpert.MobileNumber" Label="تلفن همراه" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudTextField @bind-Value="SelectedExpert.Email" Label="ایمیل" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudDatePicker @bind-Date="_birthday" PickerVariant="PickerVariant.Dialog" Style="font-family:Vazir"
+                                       Culture="@PersianDatePicker.GetPersianCulture()" UseShortNames="false"
+                                       TitleDateFormat="dddd, dd MMMM" Label="تاریخ تولد" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudTextField @bind-Value="SelectedExpert.Occupation" Label="شغل" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudSelect @bind-Value="SelectedExpert.Education" Label="تحصیلات" Variant="Variant.Outlined">
+                            <MudSelectItem Value="Education.None">بدون مدرک</MudSelectItem>
+                            <MudSelectItem Value="Education.Diploma">دیپلم</MudSelectItem>
+                            <MudSelectItem Value="Education.Associate">فوق دیپلم</MudSelectItem>
+                            <MudSelectItem Value="Education.Bachelor">کارشناسی</MudSelectItem>
+                            <MudSelectItem Value="Education.Graduate">کارشناسی ارشد</MudSelectItem>
+                            <MudSelectItem Value="Education.Doctoral">دکترا</MudSelectItem>
+                            <MudSelectItem Value="Education.Professional">فوق دکترا</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudSelect @bind-Value="SelectedExpert.Gender" Label="جنسیت" Variant="Variant.Outlined">
+                            <MudSelectItem Value="Gender.Unknown">نامشخص</MudSelectItem>
+                            <MudSelectItem Value="Gender.Male">مرد</MudSelectItem>
+                            <MudSelectItem Value="Gender.Female">زن</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem md="4" sm="6" xs="6">
+                        <MudSelect T="int" @bind-Value="SelectedExpert.FkIdSpecialty" Label="عضویت در گروه تخصصی" Variant="Variant.Outlined">
+                            @foreach (var item in SpecialtiesList)
+                            {
+                                <MudSelectItem Value="item.Id">@item.Title</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton StartIcon="@Icons.Filled.DoNotDisturbOn" Color=Color.Error OnClick="Cancel">لغو</MudButton>
+            <MudButton StartIcon="@Icons.Filled.Done" Color="SubmitButtonColor" OnClick="IsEdit?Edit:Create">@SubmitButtonText</MudButton>
+        </DialogActions>
+    </MudDialog>
+</MudRTLProvider>
+
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = new MudDialogInstance();
+
+    [Inject]
+    private IExpertService expertService { get; set; }
+
+    [Inject]
+    private IReportService reportService { get; set; }
+
+    [Parameter]
+    public ExpertBase SelectedExpert { get; set; } = new ExpertBase();
+
+    [Parameter]
+    public string SubmitButtonText { get; set; } = string.Empty;
+
+    [Parameter]
+    public Color SubmitButtonColor { get; set; }
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    [Parameter]
+    public int IdExpertSelected { get; set; }
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    void Cancel() => MudDialog.Cancel();
+
+    IEnumerable<Specialty> SpecialtiesList = new List<Specialty>();
+    private DateTime? _birthday;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetSpecialties();
+
+        if (IsEdit)
+        {
+            _birthday = SelectedExpert.BirthDate;
+        }
+        else
+        {
+            SelectedExpert.Education = Education.None;
+        }
+    }
+
+    private async Task GetSpecialties()
+    {
+        try
+        {
+            SpecialtiesList = await reportService.GetSpecialties();
+        }
+        catch (AppException ax)
+        {
+            Snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("در واکشی اطلاعات خطایی رخ داده است", Severity.Error);
+        }
+    }
+
+    private async Task Create()
+    {
+        try
+        {
+            await expertService.AddExpert(new ExpertBase()
+                {
+                    Address = SelectedExpert.Address,
+                    BirthDate = _birthday.Value,
+                    Education = SelectedExpert.Education,
+                    Email = SelectedExpert.Email,
+                    FieldOfStudy = SelectedExpert.FieldOfStudy,
+                    FirstName = SelectedExpert.FirstName,
+                    FkIdSpecialty = SelectedExpert.FkIdSpecialty,
+                    Gender = SelectedExpert.Gender,
+                    Language = SelectedExpert.Language,
+                    LastName = SelectedExpert.LastName,
+                    MobileNumber = SelectedExpert.MobileNumber,
+                    NationalCode = SelectedExpert.NationalCode,
+                    Nationality = SelectedExpert.Nationality,
+                    Occupation = SelectedExpert.Occupation,
+                    PassportNumber = SelectedExpert.PassportNumber,
+                    PhoneNumber = SelectedExpert.PhoneNumber
+                });
+            Snackbar.Add("متخصص جدید با موفقیت اضافه شد", Severity.Success);
+            MudDialog.Close();
+        }
+        catch (AppException ax)
+        {
+            Snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("در عملیات ثبت خطایی رخ داده است", Severity.Error);
+        }
+    }
+
+    private async Task Edit()
+    {
+        try
+        {
+            await expertService.UpdateExpert(new ExpertBase()
+                {
+                    Address = SelectedExpert.Address,
+                    BirthDate = _birthday.Value,
+                    Education = SelectedExpert.Education,
+                    Email = SelectedExpert.Email,
+                    FieldOfStudy = SelectedExpert.FieldOfStudy,
+                    FirstName = SelectedExpert.FirstName,
+                    FkIdSpecialty = SelectedExpert.FkIdSpecialty,
+                    Gender = SelectedExpert.Gender,
+                    Language = SelectedExpert.Language,
+                    LastName = SelectedExpert.LastName,
+                    MobileNumber = SelectedExpert.MobileNumber,
+                    NationalCode = SelectedExpert.NationalCode,
+                    Nationality = SelectedExpert.Nationality,
+                    Occupation = SelectedExpert.Occupation,
+                    PassportNumber = SelectedExpert.PassportNumber,
+                    PhoneNumber = SelectedExpert.PhoneNumber
+                }, IdExpertSelected);
+            Snackbar.Add("متخصص جدید با موفقیت اضافه شد", Severity.Success);
+            MudDialog.Close();
+        }
+        catch (AppException ax)
+        {
+            Snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            var s = ex.Message;
+            Snackbar.Add("در تغییر اطلاعات خطایی رخ داده است", Severity.Error);
+        }
+    }
+}

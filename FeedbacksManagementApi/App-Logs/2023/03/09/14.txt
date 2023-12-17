@@ -1,0 +1,18 @@
+
+2:18 PM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The INSERT statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipExpertFeedbak_TblExpert_FkIdExpert". The conflict occurred in database "FeedbackManagements", table "dbo.TblExpert", column 'Id'.
+
+
+2:19 PM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The INSERT statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipExpertFeedbak_TblExpert_FkIdExpert". The conflict occurred in database "FeedbackManagements", table "dbo.TblExpert", column 'Id'.
+
+
+2:21 PM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The INSERT statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipExpertFeedbak_TblExpert_FkIdExpert". The conflict occurred in database "FeedbackManagements", table "dbo.TblExpert", column 'Id'.
+

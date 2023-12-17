@@ -1,0 +1,128 @@
+﻿@using Domain.Entities;
+@using FeedbackManagementWeb.Services;
+@using Infrastructure.Exceptions;
+
+
+<MudRTLProvider RightToLeft=true>
+    <MudDialog>
+        <DialogContent>
+            <MudGrid Class="m-1 mt-3">
+                <MudItem md="5" sm="12" xs="12" Class="d-block">
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" >پیشنهاد سیستم</MudButton>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled">جستجو</MudButton>
+                </MudItem>
+                <MudItem md="7" sm="12" xs="12">
+                    <MudGrid>
+                        <MudItem md="9" sm="9">
+                            <MudTextField @bind-Value=_nameExpert Label="نام" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem md="3" sm="3">
+                            <div class="d-block" style="padding:2px; padding-left:10px;">
+                                <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Info" OnClick="FillterExpert"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.SearchOff" Color="Color.Dark" OnClick="CleanFilter"></MudIconButton>
+                            </div>
+                            
+                        </MudItem>
+                    </MudGrid>
+                    
+                </MudItem>
+            </MudGrid>
+            <MudTable Items="@expertList" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                <HeaderContent>
+                    <MudTh>نام</MudTh>
+                    <MudTh>تخصص</MudTh>
+                    <MudTh>تعداد مورد های پاسخ داده شده</MudTh>
+                    <MudTh>ارزشیابی سیستم</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="نام">@context.FirstName @context.LastName</MudTd>
+                    <MudTd DataLabel="تخصص">@context.FieldOfStudy</MudTd>
+                    <MudTd DataLabel="تعداد مورد های پاسخ داده شده">@context.CountAnswer</MudTd>
+                    <MudTd DataLabel="ارزشیابی سیستم"></MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.AddTask" Color="Color.Primary" OnClick="(() => SubmitButton(context.Id))"></MudIconButton>
+                    </MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    <MudText>داده ای یافت نشد</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </DialogContent>
+
+    </MudDialog>
+</MudRTLProvider>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = new MudDialogInstance();
+
+    [Inject]
+    private IExpertService expertService { get; set; }
+
+    [Inject]
+    public IDialogService DialogService { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    IEnumerable<Expert> expertList = new List<Expert>();
+    IEnumerable<Expert> expertListOrginal = new List<Expert>();
+
+    void Cancel() => MudDialog.Cancel();
+
+    private string _nameExpert = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetListExpert();
+    }
+
+    private async Task GetListExpert()
+    {
+        try
+        {
+            expertListOrginal = expertList = await expertService.GetExperts();
+            StateHasChanged();
+        }
+        catch (AppException ax)
+        {
+            Snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("در واکشی اطلاعات خطایی رخ داده است", Severity.Error);
+        }
+    }
+    private async void SubmitButton(int selected)
+    {
+        DialogOptions options = new DialogOptions() { CloseOnEscapeKey = true };
+        DialogParameters parmeters = new DialogParameters();
+        parmeters.Add("ContentText", $"میخواهید به این متخصص ارجاع شود؟");
+        parmeters.Add("ButtonText", "بله");
+        parmeters.Add("Color", Color.Success);
+        var dialodDelete = DialogService.Show<MessageDialog>("", parmeters, options);
+        var result = await dialodDelete.Result;
+        if (!result.Canceled)
+        {
+            MudDialog.Close(selected);
+        }
+    }
+
+    private void FillterExpert()
+    {
+        if (string.IsNullOrEmpty(_nameExpert))
+        {
+            Snackbar.Add("ابتدا نام متخصص را وارد کنید", Severity.Warning);
+            return;
+        }
+        expertList = expertList.Where(b => b.FirstName.Contains(_nameExpert) || b.LastName.Contains(_nameExpert)).ToList();
+    }
+
+    private void CleanFilter()
+    {
+        expertList = expertListOrginal;
+        _nameExpert = string.Empty;
+        StateHasChanged();
+    }
+}

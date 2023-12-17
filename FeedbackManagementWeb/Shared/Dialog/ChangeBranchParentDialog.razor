@@ -1,0 +1,88 @@
+﻿@using Domain.Entities;
+@using FeedbackManagementWeb.Services;
+@using Infrastructure.Exceptions;
+
+<MudPaper>
+    <MudTreeView Items="treeList" Class="m-4">
+        <ItemTemplate>
+            <MudTreeViewItem T="KnowledgeTreeReport" @bind-Expanded="@context.IsExpanded" Items="@context.KnowledgeTreeChildren" Value="@context" Text="@context.Name">
+                <Content>
+                    @if (context.Id != BranchId)
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.Check" OnClick="(()=> SubmitParent(context.Id))"></MudIconButton>
+                    }
+                    <MudTreeViewItemToggleButton @bind-Expanded="@context.IsExpanded" Visible="@context.HasChild" />
+                    <MudText>@context.Name</MudText>
+                </Content>
+            </MudTreeViewItem>
+        </ItemTemplate>
+    </MudTreeView>
+</MudPaper>
+
+@code {
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; } = new MudDialogInstance();
+
+    [Inject]
+    private IKnowledgeTreeService KnowledgeTreeService { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject]
+    public IDialogService DialogService { get; set; } = default!;
+
+    [Parameter]
+    public int BranchId { get; set; }
+
+    [Parameter]
+    public string BranchName { get; set; } = string.Empty;
+
+    private HashSet<KnowledgeTreeReport> treeList = new HashSet<KnowledgeTreeReport>();
+
+    private bool _loading = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetTree();
+    }
+
+    private async Task GetTree()
+    {
+        try
+        {
+            var result = await KnowledgeTreeService.GetKnowledgeTree();
+            treeList = new HashSet<KnowledgeTreeReport>(result);
+        }
+        catch (AppException ax)
+        {
+            Snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("در واکشی اطلاعات خطایی رخ داده است", Severity.Error);
+        }
+    }
+
+    private async Task SubmitParent(int parentId)
+    {
+        try
+        {
+            await KnowledgeTreeService.UpdateBranch(new BaseKnowledgeTree
+                {
+                    Name = BranchName,
+                    ParentId = parentId
+                }, BranchId);
+            Snackbar.Add("عملیات انتقال شاخه با موفقیت انجام شد", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (AppException ax)
+        {
+            Snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("در عملیات ثبت خطایی رخ داده است", Severity.Error);
+        }
+    }
+}

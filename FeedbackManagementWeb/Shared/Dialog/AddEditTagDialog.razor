@@ -1,0 +1,97 @@
+﻿@using Domain.Entities;
+@using FeedbackManagementWeb.Interface;
+@using FeedbackManagementWeb.Services;
+@using Infrastructure.Exceptions;
+@inject ISnackbar snackbar
+@inject ITagService tagService
+@inject IFeedbackService feedbackService
+@inject IKnowledgeTreeService knowledgeTreeService
+
+<MudRTLProvider RightToLeft="true">
+    <MudDialog>
+
+        <DialogContent>
+            <MudTextField Class="my-3" @bind-Value="Tag.Name" Label="نام تگ" Variant="Variant.Text" />
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color=Color.Error OnClick="Cancel" Class="mt-3">انصراف</MudButton>
+            <MudButton Color="Color.Success" OnClick="SubmitTag" Class="mt-3">@(IsEdit ? "ویرایش مورد" : "ثبت مورد")</MudButton>
+            </DialogActions>
+
+        </MudDialog>
+    </MudRTLProvider>
+
+    @code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = new MudDialogInstance();
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    [Parameter]
+    public Tag Tag { get; set; } = new();
+
+    [Parameter]
+    public int TagId { get; set; }
+
+    [Parameter]
+    public bool AddTagToFeedback { get; set; } = false;
+
+    [Parameter]
+    public int FeedbackId { get; set; }
+
+    [Parameter]
+    public bool AddTagToBranch { get; set; }
+
+    [Parameter]
+    public int BranchId { get; set; }
+
+    private async Task SubmitTag()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(Tag.Name))
+            {
+                snackbar.Add("نام تگ نمیتواند خالی باشد", Severity.Warning);
+            }
+            if (IsEdit)
+            {
+                await tagService.UpdateTag(Tag, TagId);
+                MudDialog.Close(DialogResult.Ok(true));
+                snackbar.Add("ویرایش تگ با موفقیت انجام شد", Severity.Success);
+            }
+            else
+            {
+                if (AddTagToFeedback)
+                {
+                    await feedbackService.AddTagForFeedback(new Domain.Model.AddTagToFeedbackRequestModel
+                        {
+                            FeedbackId = FeedbackId,
+                            Tag = Tag
+                        });
+                }
+                else if (AddTagToBranch)
+                {
+                    await knowledgeTreeService.AddTagToBranch(Tag, BranchId);
+                }
+                else
+                {
+                    await tagService.AddTag(Tag);
+                }
+                MudDialog.Close(DialogResult.Ok(true));
+                snackbar.Add("تگ با موفقیت ثبت شد", Severity.Success);
+            }
+        }
+        catch (AppException ax)
+        {
+            snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+}

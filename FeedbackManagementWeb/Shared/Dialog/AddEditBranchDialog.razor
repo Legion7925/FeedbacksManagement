@@ -1,0 +1,96 @@
+﻿@using Domain.Entities;
+@using FeedbackManagementWeb.Services;
+@using Infrastructure.Exceptions;
+
+
+<MudRTLProvider RightToLeft=true>
+    <MudDialog>
+        <DialogContent>
+            <MudForm>
+                @if (IsRoot)
+                {
+                    <MudTextField @bind-Value="Branch.Name" Label="نام درخت" Variant="Variant.Outlined" />
+                }
+                else
+                {
+                    <MudTextField @bind-Value="Branch.Name" Label="نام شاخه" Variant="Variant.Outlined" />
+                }
+            </MudForm>
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton StartIcon="@Icons.Material.Filled.DoNotDisturbOn" Color=Color.Error OnClick="Cancel">لغو</MudButton>
+            <MudButton StartIcon="@Icons.Material.Filled.Done" Color="SubmitButtonColor" OnClick="SubmitBranch">@SubmitButtonText</MudButton>
+        </DialogActions>
+    </MudDialog>
+</MudRTLProvider>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = new MudDialogInstance();
+
+    [Inject]
+    public IKnowledgeTreeService KnowledgeTreeService { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Parameter]
+    public string SubmitButtonText { get; set; } = string.Empty;
+
+    [Parameter]
+    public Color SubmitButtonColor { get; set; }
+
+    [Parameter]
+    public bool IsRoot { get; set; } = true;
+
+    [Parameter]
+    public int? ParentId { get; set; }
+
+    [Parameter]
+    public int BranchId { get; set; }
+
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    [Parameter]
+    public BaseKnowledgeTree Branch { get; set; } = new();
+
+    void Cancel() => MudDialog.Cancel();
+
+
+    private async Task SubmitBranch()
+    {
+        try
+        {
+            if (IsRoot)
+                Branch.ParentId = null;
+            else
+                Branch.ParentId = ParentId;
+
+            if (IsEdit)
+            {
+                await KnowledgeTreeService.UpdateBranch(Branch,BranchId);
+                Snackbar.Add("عملیات ویرایش با موفقیت انجام شد", Severity.Success);
+            }
+            else
+            {
+                await KnowledgeTreeService.AddBranch(Branch);
+                if (IsRoot)
+                    Snackbar.Add("درخت جدید با موفقیت اضافه شد", Severity.Success);
+                else
+                    Snackbar.Add("شاخه جدید با موفقیت اضافه شد", Severity.Success);
+            }
+
+            MudDialog.Close();
+        }
+        catch (AppException ax)
+        {
+            Snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("در عملیات ثبت خطایی رخ داده است", Severity.Error);
+        }
+    }
+}

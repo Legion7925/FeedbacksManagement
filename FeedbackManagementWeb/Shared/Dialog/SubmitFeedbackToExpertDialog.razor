@@ -1,0 +1,116 @@
+﻿@using Domain.Entities;
+@using FeedbackManagementWeb.Interface;
+@using FeedbackManagementWeb.Services;
+@using FeedbacksManagementApi.Model;
+@using Infrastructure.Exceptions;
+@inject IExpertService ExpertService
+@inject IReportService ReportService
+
+<MudRTLProvider RightToLeft="true">
+    <MudDialog>
+
+        <DialogContent>
+            <MudGrid>
+                <MudItem md="10" sm="10">
+                    <MudSelect Class="my-3" T="string" @bind-Value="_expertName" Label="متخصص">
+                        @foreach (var item in ExpertList)
+                        {
+                            <MudSelectItem Value="@(item.FirstName+" "+item.LastName)">@item.FirstName @item.LastName</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem md="1" sm="1">
+                    <MudIconButton Icon="@Icons.Material.Filled.PersonSearch" Color="Color.Primary" Edge="Edge.End" OnClick="ChoiceExpert" />
+                </MudItem>
+            </MudGrid>
+            <MudTextField Class="mt-10" @bind-Value="@feedbacks.Description" Label="توضیحات" Lines=4 Variant="Variant.Outlined"></MudTextField>
+
+        </DialogContent>
+        <DialogActions>
+            <MudButton Color=Color.Error OnClick="Cancel" Class="mt-3">انصراف</MudButton>
+            <MudButton Color="Color.Success" OnClick="SubmitCase" Class="mt-3">ارسال</MudButton>
+        </DialogActions>
+
+    </MudDialog>
+</MudRTLProvider>
+
+@code {
+    [Inject]
+    public IFeedbackService FeedbackService { get; set; } = default!;
+
+    [Inject]
+    public ISnackbar snackbar { get; set; } = default!;
+
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = new MudDialogInstance();
+
+    [Inject]
+    public IDialogService DialogService { get; set; } = default!;
+
+    [Parameter]
+    public List<int> FeedbackIds { get; set; } = new();
+
+    private SubmitFeedbacksToExpertRequestModel feedbacks = new();
+
+    private IEnumerable<Expert> ExpertList = new List<Expert>();
+
+    private string _expertName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetExperts();
+    }
+
+    private async Task SubmitCase()
+    {
+        try
+        {
+            feedbacks.ExpertId = ExpertList.FirstOrDefault(i => i.FirstName + " " + i.LastName == _expertName)?.Id ?? 0;
+            feedbacks.FeedbackIds = FeedbackIds.ToArray();
+            await FeedbackService.SubmitFeedbacksToExpert(feedbacks);
+            MudDialog.Close(DialogResult.Ok(true));
+            snackbar.Add("موارد با موفقیت برای کارشناس ارسال شدند", Severity.Success);
+        }
+        catch (AppException ax)
+        {
+            snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task GetExperts()
+    {
+        try
+        {
+            ExpertList = await ExpertService.GetExperts();
+        }
+        catch (AppException ax)
+        {
+            snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    private async Task ChoiceExpert()
+    {
+        DialogOptions options = new DialogOptions() { CloseOnEscapeKey = false, DisableBackdropClick = true, MaxWidth = MaxWidth.Large, CloseButton = true };
+        var choiceExpert = DialogService.Show<ChoiceKindOfExpertDialog>("", options);
+        var result = await choiceExpert.Result;
+        if (!result.Canceled)
+        {
+            var expert = ExpertList.FirstOrDefault(i => i.Id == Convert.ToInt32(result.Data));
+            _expertName = expert!.FirstName + " " + expert!.LastName;
+            StateHasChanged();
+        }
+
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+}

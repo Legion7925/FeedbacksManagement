@@ -1,0 +1,36 @@
+
+10:28 AM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The MERGE statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipExpertFeedbak_TblFeedback_FkIdFeedback". The conflict occurred in database "FeedbackManagements", table "dbo.TblFeedback", column 'Id'.
+
+
+10:30 AM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The MERGE statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipExpertFeedbak_TblFeedback_FkIdFeedback". The conflict occurred in database "FeedbackManagements", table "dbo.TblFeedback", column 'Id'.
+
+
+10:30 AM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The INSERT statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipExpertFeedbak_TblFeedback_FkIdFeedback". The conflict occurred in database "FeedbackManagements", table "dbo.TblFeedback", column 'Id'.
+
+
+10:38 AM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The INSERT statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipExpertFeedbak_TblFeedback_FkIdFeedback". The conflict occurred in database "FeedbackManagements", table "dbo.TblFeedback", column 'Id'.
+
+
+10:40 AM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The INSERT statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipExpertFeedbak_TblFeedback_FkIdFeedback". The conflict occurred in database "FeedbackManagements", table "dbo.TblFeedback", column 'Id'.
+
+
+10:44 AM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+Invalid column name 'Respond'.
+

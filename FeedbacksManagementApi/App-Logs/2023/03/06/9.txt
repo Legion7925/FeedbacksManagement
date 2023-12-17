@@ -1,0 +1,14 @@
+
+9:21 AM
+Missing type map configuration or unsupported mapping.
+
+Mapping types:
+AnsowerBase -> TblAnsower
+Domain.Entities.AnsowerBase -> Infrastructure.Data.TblAnsower
+Missing type map configuration or unsupported mapping.
+
+Mapping types:
+AnsowerBase -> TblAnsower
+Domain.Entities.AnsowerBase -> Infrastructure.Data.TblAnsower
+
+

@@ -1,0 +1,103 @@
+﻿@page "/ExpertsReport"
+@using Domain.Entities;
+@using Domain.Shared.Enums;
+
+<MudContainer>
+    <MudGrid>
+        <MudItem md="3" xs="6" sm="12">
+            <MudTextField T="string" @bind-Value="filter.FirstName" Label="نام"></MudTextField>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12">
+            <MudTextField T="string" @bind-Value="filter.LastName" Label="نام خانوادگی"></MudTextField>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12">
+            <MudTextField T="string" @bind-Value="filter.Email" Label="ایمیل"></MudTextField>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12">
+            <MudTextField T="string" @bind-Value="filter.MobileNumber" Label="شماره تماس"></MudTextField>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12">
+            <MudTextField T="string" @bind-Value="filter.FieldOfStudy" Label="رشته تحصیلی"></MudTextField>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12">
+            <MudTextField T="string" @bind-Value="filter.NationalCode" Label="کد ملی"></MudTextField>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12">
+            <MudTextField T="string" @bind-Value="filter.Nationality" Label="ملیت"></MudTextField>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12">
+            <MudTextField T="string" @bind-Value="filter.PassportNumber" Label="شماره پاسپورت"></MudTextField>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12">
+            <MudTextField T="string" @bind-Value="filter.Language" Label="زبان"></MudTextField>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12">
+            <MudSelect @bind-Value="filter.Education" Label="تحصیلات">
+                <MudSelectItem Value="Education.All">همه</MudSelectItem>
+                <MudSelectItem Value="Education.None">بدون مدرک</MudSelectItem>
+                <MudSelectItem Value="Education.Diploma">دیپلم</MudSelectItem>
+                <MudSelectItem Value="Education.Associate">فوق دیپلم</MudSelectItem>
+                <MudSelectItem Value="Education.Bachelor">کارشناسی</MudSelectItem>
+                <MudSelectItem Value="Education.Graduate">کارشناسی ارشد</MudSelectItem>
+                <MudSelectItem Value="Education.Doctoral">دکترا</MudSelectItem>
+                <MudSelectItem Value="Education.Professional">فوق دکترا</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12">
+            <MudSelect T="int" @bind-Value="filter.FkIdSpecialty" Label="عضویت در گروه تخصصی">
+                @foreach (var item in SpecialtiesList)
+                {
+                    <MudSelectItem Value="item.Id">@item.Title</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem md="3" xs="6" sm="12" Class="d-flex flex-row-reverse">
+            <MudButton Class="mt-3 ml-3" Variant="Variant.Filled" Color="Color.Primary" OnClick="GetReport">گزارش</MudButton>
+            <MudButton Class="mt-3 ml-3" Variant="Variant.Filled" Color="Color.Dark" OnClick="RemoveFilter">پاک کردن فیلتر</MudButton>
+        </MudItem>
+    </MudGrid>
+
+
+    <MudTable @ref=@_table T="Expert" Class="m-3" Items="@expertList" Hover="true" Breakpoint="Breakpoint.Sm"
+              ServerData="@(new Func<TableState, Task<TableData<Expert>>>(GetFeedbackReport))"
+              Striped="true" Elevation="2" RowsPerPage="10">
+
+        <HeaderContent>
+            <MudTh>نام متخصص</MudTh>
+            <MudTh>کد ملی</MudTh>
+            <MudTh>ملیت</MudTh>
+            <MudTh>شماره پاسپورت</MudTh>
+            <MudTh>سطح دانشگاهی</MudTh>
+            <MudTh>تخصص</MudTh>
+            <MudTh>تاریخ عضویت</MudTh>
+            <MudTh>جنسیت</MudTh>
+            <MudTh>زبان</MudTh>
+            <MudTh>آدرس</MudTh>
+            <MudTh>رشته تحصیلی</MudTh>
+            <MudTh>شماره تماس</MudTh>
+            <MudTh>شغل</MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="نام متخصص">@context.FirstName @context.LastName</MudTd>
+            <MudTd DataLabel="کد ملی">@context.NationalCode</MudTd>
+            <MudTd DataLabel="ملیت">@context.Nationality</MudTd>
+            <MudTd DataLabel="شماره پاسپورت">@context.PassportNumber</MudTd>
+            <MudTd DataLabel="سطح دانشگاهی">@context.EducationTranslate</MudTd>
+            <MudTd DataLabel="تخصص">@context.FieldOfStudy</MudTd>
+            <MudTd DataLabel="تاریخ عضویت">@context.CreatedFa</MudTd>
+            <MudTd DataLabel="جنسیت">@context.GenderTranslate</MudTd>
+            <MudTd DataLabel="زبان">@context.Language</MudTd>
+            <MudTd DataLabel="آدرس">@context.Address</MudTd>
+            <MudTd DataLabel="رشته تحصیلی">@context.FieldOfStudy</MudTd>
+            <MudTd DataLabel="شماره تماس">@context.MobileNumber</MudTd>
+            <MudTd DataLabel="شغل">@context.Occupation</MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>داده ای یافت نشد</MudText>
+        </NoRecordsContent>
+        <PagerContent>
+            <MudTablePager HideRowsPerPage="true" HidePageNumber="true" PageSizeOptions="@_pageSizeOption" RowsPerPageString="تعداد ردیف" />
+        </PagerContent>
+    </MudTable>
+</MudContainer>

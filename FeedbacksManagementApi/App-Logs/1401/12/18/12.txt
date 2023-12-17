@@ -1,0 +1,6 @@
+
+12:01 ب.ظ
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The INSERT statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipExpertFeedbak_TblFeedback_FkIdFeedback". The conflict occurred in database "FeedbackManagements", table "dbo.TblFeedback", column 'Id'.
+

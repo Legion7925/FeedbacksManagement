@@ -1,0 +1,63 @@
+﻿@using Domain.Entities;
+@using Domain.Model;
+<MudRTLProvider RightToLeft="true">
+    <MudDialog>
+        <DialogContent>
+            <MudTabs Class="m-3" Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+                <MudTabPanel Text="تگ های موضوعی">
+                    <div class="m-3">
+                        <MudFab Class="my-3" StartIcon="@Icons.Material.Outlined.Add" Color="Color.Success" Size="Size.Medium" OnClick="OpenAddTagDialog" />
+                        <MudTable Items="Tags" T="TagsBranchModel" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                            <HeaderContent>
+                                <MudTh>کد</MudTh>
+                                <MudTh>تگ</MudTh>
+                                <MudTh></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="کد">@context.tagId</MudTd>
+                                <MudTd DataLabel="تگ">@context.TagName</MudTd>
+                                <MudTd>
+                                    <MudTooltip Text="حذف" Placement="Placement.Bottom">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="(()=> OpenDeleteTagDialog(context.RelationId))"></MudIconButton>
+                                    </MudTooltip>
+                                    <MudTooltip Text="ویرایش" Placement="Placement.Bottom">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info"
+                                        OnClick="(()=> OpenEditTagDialog(context.tagId , new Tag{Id = context.tagId, Name = context.TagName}))"></MudIconButton>
+                                    </MudTooltip>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </div>
+                </MudTabPanel>
+                <MudTabPanel Text="متخصصین مرتبط">
+                    <MudGrid Style="align-items:baseline">
+                        <MudItem xs=6 sm=6 Class="d-flex flex-row">
+                            <MudFab StartIcon="@Icons.Material.Outlined.Add" Color="Color.Success" Size="Size.Medium" OnClick="OpenAddExpertToBranchDialog" />
+                        </MudItem>
+                        <MudItem xs=6 sm=6 Class="d-flex flex-row-reverse">
+                        </MudItem>
+                    </MudGrid>
+                    <MudTable Items="ExpertList" T="ExpertsBranchModel" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                        <HeaderContent>
+                            <MudTh>نام و نام خانوادگی</MudTh>
+                            <MudTh></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="کد">@context.RelationId</MudTd>
+                            <MudTd DataLabel="تگ">@context.ExpertName</MudTd>
+                            <MudTd>
+                                <MudTooltip Text="حذف" Placement="Placement.Bottom">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="(()=> OpenDeleteExpertDialog(context.RelationId))"></MudIconButton>
+                                </MudTooltip>
+                                <MudTooltip Text="انتقال شاخه" Placement="Placement.Bottom">
+                                    <MudIconButton Icon="@Icons.Material.Filled.ChangeCircle" Color="Color.Info" OnClick="(()=> OpenUpdateExpertBranchDialog(context.RelationId))"></MudIconButton>
+                                </MudTooltip>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudTabPanel>
+            </MudTabs>
+        </DialogContent>
+    </MudDialog>
+
+</MudRTLProvider>

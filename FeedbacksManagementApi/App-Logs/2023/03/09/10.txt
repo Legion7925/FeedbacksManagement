@@ -1,0 +1,18 @@
+
+10:01 AM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The INSERT statement conflicted with the FOREIGN KEY SAME TABLE constraint "FK_TblKnowledgeTree_TblKnowledgeTree_ParentId". The conflict occurred in database "FeedbacksManagement", table "dbo.TblKnowledgeTree", column 'Id'.
+
+
+10:01 AM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The INSERT statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipTreeTag_TblTag_FkIdTag". The conflict occurred in database "FeedbacksManagement", table "dbo.TblTag", column 'Id'.
+
+
+10:02 AM
+An error occurred while saving the entity changes. See the inner exception for details.
+An error occurred while saving the entity changes. See the inner exception for details.
+The INSERT statement conflicted with the FOREIGN KEY constraint "FK_TblRelationshipTreeTag_TblTag_FkIdTag". The conflict occurred in database "FeedbacksManagement", table "dbo.TblTag", column 'Id'.
+

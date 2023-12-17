@@ -1,0 +1,96 @@
+﻿@page "/SentFeedback"
+@using Domain.Entities;
+
+<MudPaper Class="pa-3 mt-5 mb-4">
+    <MudGrid Style="align-items:baseline">
+        <MudItem xs=2 sm=2 Class="d-flex flex-row">
+            <MudSelect T="bool" Label="نوع نمایش" @bind-Value="isFeedbackAnswered">
+                <MudSelectItem @onclick="SelectedValueChanged" Value="false">ارسال شده</MudSelectItem>
+                <MudSelectItem Value="true">بازگشت خورده</MudSelectItem>
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="10" sm="10" Class="d-flex flex-row-reverse">
+            <MudButton Variant=Variant.Outlined Color=Color.Info OnClick="OpenSubmitToReadyToSendDialog">تایید نامه برای ارسال</MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+@if (isFeedbackAnswered)
+{
+    <MudRTLProvider RightToLeft=false>
+        <MudTable @ref=@_table T="FeedbackReport" Class="m-3" Items="@feedbackList" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading"
+              LoadingProgressColor="Color.Info" MultiSelection="true" @bind-SelectedItems="selectedFeedbacks"
+              ServerData="@(new Func<TableState, Task<TableData<FeedbackReport>>>(GetFeedbacks))"
+              Striped="true" Elevation="2" RowsPerPage="10">
+            <HeaderContent>
+                <MudTh></MudTh>
+                <MudTh Style="text-align:center">میزان شباهت</MudTh>
+                <MudTh Style="text-align:center">تگ های اتوماتیک</MudTh>
+                <MudTh Style="text-align:center">تاریخ بازگشت</MudTh>
+                <MudTh Style="text-align:center">تاریخ ارجاع</MudTh>
+                <MudTh Style="text-align:center">نام نخبه</MudTh>
+                <MudTh Style="text-align:center">عنوان</MudTh>
+                <MudTh Style="text-align:center">شماره سریال</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    <MudTooltip Text="جزئیات">
+                        <MudIconButton Icon="@Icons.Material.Filled.Info" Color="Color.Info" OnClick="(()=>OpenFeedbackDetailsDialog(context.Id))"></MudIconButton>
+                    </MudTooltip>
+                </MudTd>
+                <MudTd Style="text-align:center" DataLabel="میزان شباهت">@context.Similarity</MudTd>
+                <MudTd Style="text-align:center" DataLabel="تگ های اتوماتیک">@context.TagsUs</MudTd>
+                <MudTd Style="text-align:center" DataLabel="تاریخ بازگشت">@context.RespondDateFa</MudTd>
+                <MudTd Style="text-align:center" DataLabel="تاریخ ارجاع">@context.RefrerralDateFa</MudTd>
+                <MudTd Style="text-align:center" DataLabel="نام نخبه">@context.ExpertUs</MudTd>
+                <MudTd Style="text-align:center" DataLabel="عنوان">@context.Title</MudTd>
+                <MudTd Style="text-align:center" DataLabel="شماره سریال">@context.SerialNumber</MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText>داده ای یافت نشد</MudText>
+            </NoRecordsContent>
+            <PagerContent>
+                <MudTablePager HideRowsPerPage="true" PageSizeOptions="@_pageSizeOption" RowsPerPageString="تعداد ردیف" />
+            </PagerContent>
+        </MudTable>
+    </MudRTLProvider>
+
+}
+else
+{
+    <MudRTLProvider RightToLeft=false>
+        <MudTable @ref=@_table T="FeedbackReport" Class="m-3" Items="@feedbackList" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading"
+              LoadingProgressColor="Color.Info" MultiSelection="true" @bind-SelectedItems="selectedFeedbacks"
+              ServerData="@(new Func<TableState, Task<TableData<FeedbackReport>>>(GetFeedbacks))"
+              Striped="true" Elevation="2" RowsPerPage="10">
+            <HeaderContent>
+                <MudTh></MudTh>
+                <MudTh Style="text-align:center">میزان شباهت</MudTh>
+                <MudTh Style="text-align:center">تگ های اتوماتیک</MudTh>
+                <MudTh Style="text-align:center">تاریخ ارجاع</MudTh>
+                <MudTh Style="text-align:center">نام نخبه</MudTh>
+                <MudTh Style="text-align:center">عنوان</MudTh>
+                <MudTh Style="text-align:center">شماره سریال</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    <MudTooltip Text="جزئیات">
+                        <MudIconButton Icon="@Icons.Material.Filled.Info" Color="Color.Info" OnClick="(()=>OpenFeedbackDetailsDialog(context.Id))"></MudIconButton>
+                    </MudTooltip>
+                </MudTd>
+                <MudTd Style="text-align:center" DataLabel="میزان شباهت">@context.Similarity</MudTd>
+                <MudTd Style="text-align:center" DataLabel="تگ های اتوماتیک">@context.TagsUs</MudTd>
+                <MudTd Style="text-align:center" DataLabel="تاریخ ارجاع">@context.RefrerralDateFa</MudTd>
+                <MudTd Style="text-align:center" DataLabel="نام نخبه">@context.ExpertUs</MudTd>
+                <MudTd Style="text-align:center" DataLabel="عنوان">@context.Title</MudTd>
+                <MudTd Style="text-align:center" DataLabel="شماره سریال">@context.SerialNumber</MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText>داده ای یافت نشد</MudText>
+            </NoRecordsContent>
+            <PagerContent>
+                <MudTablePager HideRowsPerPage="true" HidePageNumber="true" PageSizeOptions="@_pageSizeOption" RowsPerPageString="تعداد ردیف" />
+            </PagerContent>
+        </MudTable>
+    </MudRTLProvider>
+
+}

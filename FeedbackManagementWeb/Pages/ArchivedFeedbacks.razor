@@ -1,0 +1,50 @@
+﻿@page "/ArchivedFeedbacks"
+@using Domain.Entities;
+
+<MudPaper Class="pa-3 mt-5 mb-4">
+    <MudGrid Style="align-items:baseline">
+        <MudItem xs=6 sm=6 Class="d-flex flex-row">
+        </MudItem>
+        <MudItem xs=6 sm=6 Class="d-flex flex-row-reverse">
+            <MudButtonGroup Class="align-center" Color="Color.Primary" Variant="Variant.Outlined" OverrideStyles="false">
+                <MudButton Variant=Variant.Outlined Color=Color.Error >حذف کلی</MudButton>
+                <MudButton Variant="Variant.Outlined" Color=Color.Info OnClick="RecycleSelectedCases">بازیابی موارد</MudButton>
+            </MudButtonGroup>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+<MudRTLProvider RightToLeft=false>
+    <MudTable @ref=@_table T="FeedbackReport" Class="m-3" Items="@feedbackList" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading"
+              LoadingProgressColor="Color.Info" MultiSelection="true" @bind-SelectedItems="selectedFeedbacks"
+              ServerData="@(new Func<TableState, Task<TableData<FeedbackReport>>>(GetFeedbacks))"
+              Striped="true" Elevation="2" RowsPerPage="10">
+        <HeaderContent>
+            <MudTh></MudTh>
+            <MudTh Style="text-align:center">میزان شباهت</MudTh>
+            <MudTh Style="text-align:center">تگ های اتوماتیک</MudTh>
+            <MudTh Style="text-align:center">آدرس منشاء</MudTh>
+            <MudTh Style="text-align:center">منشاء</MudTh>
+            <MudTh Style="text-align:center">عنوان</MudTh>
+            <MudTh Style="text-align:center">شماره سریال</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>
+                <MudTooltip Text="جزئیات">
+                    <MudIconButton Icon="@Icons.Material.Filled.Info" Color="Color.Info" OnClick="(()=>OpenFeedbackDetailsDialog(context.Id))"></MudIconButton>
+                </MudTooltip>
+            </MudTd>
+            <MudTd Style="text-align:center" DataLabel="میزان شباهت">@context.Similarity</MudTd>
+            <MudTd Style="text-align:center" DataLabel="تگ های اتوماتیک">@context.TagsUs</MudTd>
+            <MudTd Style="text-align:center" DataLabel="آدرس منشاء">@context.SourceAddress</MudTd>
+            <MudTd Style="text-align:center" DataLabel="منشاء">@context.SourceTranslate</MudTd>
+            <MudTd Style="text-align:center" DataLabel="عنوان">@context.Title</MudTd>
+            <MudTd Style="text-align:center" DataLabel="شماره سریال">@context.SerialNumber</MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>داده ای یافت نشد</MudText>
+        </NoRecordsContent>
+        <PagerContent>
+            <MudTablePager HideRowsPerPage="true"  PageSizeOptions="@_pageSizeOption" RowsPerPageString="تعداد ردیف" />
+        </PagerContent>
+    </MudTable>
+</MudRTLProvider>

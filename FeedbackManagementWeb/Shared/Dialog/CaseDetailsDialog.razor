@@ -1,0 +1,24 @@
+﻿@using Domain.Entities;
+<MudDialog>
+    <DialogContent>
+        <MudRTLProvider RightToLeft="true">
+            <MudPaper id="PrintPos" Class="pa-4 mt-4 mb-4" Elevation="3" MinWidth="700px" MaxWidth="250px" dir="rtl">
+                <MudText Style="line-height:3rem" Typo="Typo.h5">اطلاعات تیکت</MudText>
+                <MudText Class="my-3" Typo="Typo.body1">عنوان : @Case.Title</MudText>
+                <MudText Class="my-3" Typo="Typo.body1">منشاء : @Case.SourceTranslate</MudText>
+                <MudText Class="my-3" Typo="Typo.body1">آدرس منشاء : @Case.SourceAddress</MudText>
+                <MudText Class="my-3" Typo="Typo.body1">نام مشتری : @Case.CustomerName</MudText>
+                <MudText Class="my-3" Typo="Typo.body1">متن : @Case.Description</MudText>
+                <MudText Class="my-3" Typo="Typo.body1">الحاقیات : @Case.Resources</MudText>
+            </MudPaper>
+        </MudRTLProvider>
+    </DialogContent>
+</MudDialog>
+
+@code{
+    [CascadingParameter]
+    public MudDialogInstance MudDialog { get; set; } = new MudDialogInstance();
+
+    [Parameter]
+    public CaseReport Case { get; set; } = new();
+}

@@ -1,0 +1,123 @@
+﻿@using Domain.Entities;
+@using FeedbackManagementWeb.Services;
+@using Infrastructure.Exceptions;
+
+
+<MudRTLProvider RightToLeft=true>
+    <MudDialog>
+        <DialogContent>
+            <MudGrid Class="m-1 mt-3">
+                <MudItem md="5" sm="12" xs="12" Class="d-block">
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled">پیشنهاد سیستم</MudButton>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled">جستجو</MudButton>
+                </MudItem>
+                <MudItem md="7" sm="12" xs="12">
+                    <MudGrid>
+                        <MudItem md="9" sm="9">
+                            <MudTextField @bind-Value=_nameExpert Label="نام" Variant="Variant.Outlined" />
+                        </MudItem>
+                        <MudItem md="3" sm="3">
+                            <div class="d-block" style="padding:2px; padding-left:10px;">
+                                <MudIconButton Icon="@Icons.Material.Filled.Search" Color="Color.Info" OnClick="FillterExpertGroup"></MudIconButton>
+                                <MudIconButton Icon="@Icons.Material.Filled.SearchOff" Color="Color.Dark" OnClick="CleanFilter"></MudIconButton>
+                            </div>
+
+                        </MudItem>
+                    </MudGrid>
+
+                </MudItem>
+            </MudGrid>
+            <MudTable Items="@SpecialtiesList" Hover="true" Breakpoint="Breakpoint.Sm" LoadingProgressColor="Color.Info">
+                <HeaderContent>
+                    <MudTh>نام گروه متخصص</MudTh>
+                    <MudTh>ارزشیابی سیستم</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="نام گروه متخصص">@context.Title</MudTd>
+                    <MudTd DataLabel="ارزشیابی سیستم"></MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.AddTask" Color="Color.Primary" OnClick="(() => SubmitButton(context.Id))"></MudIconButton>
+                    </MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    <MudText>داده ای یافت نشد</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </DialogContent>
+
+    </MudDialog>
+</MudRTLProvider>
+
+@code {
+    [CascadingParameter]
+    MudDialogInstance MudDialog { get; set; } = new MudDialogInstance();
+
+    [Inject]
+    private IReportService reportService { get; set; }
+
+    [Inject]
+    public IDialogService DialogService { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    IEnumerable<Specialty> SpecialtiesList = new List<Specialty>();
+    IEnumerable<Specialty> SpecialtiesListOrginal = new List<Specialty>();
+
+    void Cancel() => MudDialog.Cancel();
+
+    private string _nameExpert = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetSpecialties();
+    }
+
+    private async Task GetSpecialties()
+    {
+        try
+        {
+            SpecialtiesListOrginal = SpecialtiesList = await reportService.GetSpecialties();
+        }
+        catch (AppException ax)
+        {
+            Snackbar.Add(ax.Message, Severity.Warning);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+    private async void SubmitButton(int selected)
+    {
+        DialogOptions options = new DialogOptions() { CloseOnEscapeKey = true };
+        DialogParameters parmeters = new DialogParameters();
+        parmeters.Add("ContentText", $"میخواهید به این گروه متخصص ارجاع شود؟");
+        parmeters.Add("ButtonText", "بله");
+        parmeters.Add("Color", Color.Success);
+        var dialodDelete = DialogService.Show<MessageDialog>("", parmeters, options);
+        var result = await dialodDelete.Result;
+        if (!result.Canceled)
+        {
+            MudDialog.Close(selected);
+        }
+    }
+
+    private void FillterExpertGroup()
+    {
+        if (string.IsNullOrEmpty(_nameExpert))
+        {
+            Snackbar.Add("ابتدا نام متخصص را وارد کنید", Severity.Warning);
+            return;
+        }
+        SpecialtiesList = SpecialtiesList.Where(b => b.Title!.Contains(_nameExpert)).ToList();
+    }
+
+    private void CleanFilter()
+    {
+        SpecialtiesList = SpecialtiesListOrginal;
+        _nameExpert = string.Empty;
+        StateHasChanged();
+    }
+}

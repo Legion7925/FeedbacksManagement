@@ -1,0 +1,46 @@
+﻿@page "/Cases"
+
+@using Domain.Entities;
+@using FeedbackManagementWeb.Component
+
+
+
+<MudPaper Class="pa-3 mt-5 mb-4">
+    <MudGrid Style="align-items:baseline">
+        <MudItem xs=6 sm=6 Class="d-flex flex-row">
+            <MudFab Icon="@Icons.Material.Outlined.Add" Color="Color.Success" Size="Size.Medium" OnClick="OpenAddCaseDialog" />
+        </MudItem>
+        <MudItem xs=6 sm=6 Class="d-flex flex-row-reverse">
+            <MudButtonGroup Class="align-center" Color="Color.Primary" Variant="Variant.Outlined" OverrideStyles="false">
+                <MudButton Variant=Variant.Outlined Color=Color.Info OnClick="SendCasesForAnswer">ارسال برای پاسخ دهی</MudButton>
+                <MudButton Variant="Variant.Outlined" Color=Color.Error OnClick="DeleteSelectedCases">حذف موارد</MudButton>
+            </MudButtonGroup>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+<MudRTLProvider RightToLeft=false>
+    <MudTable @ref=@_table T="CaseReport" Class="m-3" Items="@casesList" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading"
+              LoadingProgressColor="Color.Info" MultiSelection="true" @bind-SelectedItems="selectedCases" ServerData="@(new Func<TableState, Task<TableData<CaseReport>>>(GetCases))"
+              Striped="true" Elevation="2" RowsPerPage="10">
+        <HeaderContent>
+            <MudTh></MudTh>
+            <MudTh Style="text-align:center">آدرس منشاء</MudTh>
+            <MudTh Style="text-align:center">منشاء</MudTh>
+            <MudTh Style="text-align:center">عنوان</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTooltip Text="نمایش جزئیات">
+                <MudIconButton Icon="@Icons.Material.Filled.Article" Color="Color.Info" OnClick="(()=> ShowCaseDetails(context))"></MudIconButton>
+            </MudTooltip>
+            <MudTd Style="text-align:center" DataLabel="آدرس منشاء">@context.SourceTranslate : @context.SourceAddress</MudTd>
+            <MudTd Style="text-align:center" DataLabel="منشاء">@context.SourceTranslate</MudTd>
+            <MudTd Style="text-align:center" DataLabel="عنوان">@context.Title</MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>داده ای یافت نشد</MudText>
+        </NoRecordsContent>
+        <PagerContent>
+            <MudTablePager HideRowsPerPage="true" PageSizeOptions="@_pageSizeOption" RowsPerPageString="تعداد ردیف" />
+        </PagerContent>
+    </MudTable>
+</MudRTLProvider>

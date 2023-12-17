@@ -1,0 +1,128 @@
+﻿@page "/Report"
+@using Domain.Entities;
+@using Domain.Shared.Enums;
+@using FeedbackManagementWeb.Helper;
+
+<MudPaper Class="pa-3 mt-3 mb-4">
+    <MudGrid Style="align-items:baseline">
+        <MudItem md="2" xs=5 sm=5 Class="m-3">
+            <div class="row">
+                <MudTextField T="string" @bind-Value="filter.SerialNumber" Label="شماره سریال"></MudTextField>
+                <MudTextField Class="mt-3" T="string" @bind-Value="filter.Title" Label="عنوان"></MudTextField>
+                <MudTextField Class="mt-3" T="string" Label="تگ های موضوعی"></MudTextField>
+                <MudAutocomplete T="string" Class="mt-3" Label="محصول" CoerceText="false"
+                                 ResetValueOnEmptyText="true" SearchFunc="SearchProductName" />
+                <MudAutocomplete T="string" Class="mt-3" Label="مشتری" CoerceText="false"
+                                 ResetValueOnEmptyText="true" SearchFunc="SearchCustomerName" @bind-Value="customerNameFilter" />
+            </div>
+        </MudItem>
+        <MudItem md="2" xs=5 sm=5 Class="m-3">
+            <div class="row">
+
+                <MudSelect Label="منبع" @bind-Value="filter.Source">
+                    <MudSelectItem Value="Source.All">همه</MudSelectItem>
+                    <MudSelectItem Value="Source.Email">ایمیل</MudSelectItem>
+                    <MudSelectItem Value="Source.SMS">ایمیل</MudSelectItem>
+                    <MudSelectItem Value="Source.MobileApp">نرم افزار موبایل</MudSelectItem>
+                    <MudSelectItem Value="Source.Site">وب سایت</MudSelectItem>
+                </MudSelect>
+
+                <MudSelect Label="وضعیت" @bind-Value="filter.State">
+                    <MudSelectItem Value="FeedbackState.All">همه</MudSelectItem>
+                    <MudSelectItem Value="FeedbackState.ReadyToSend">آماده ارسال</MudSelectItem>
+                    <MudSelectItem Value="FeedbackState.SentToExpert">ارسال شده به متخصص</MudSelectItem>
+                    <MudSelectItem Value="FeedbackState.Answered">پاسخ داده شده</MudSelectItem>
+                    <MudSelectItem Value="FeedbackState.Archived">بایگانی شده</MudSelectItem>
+                    <MudSelectItem Value="FeedbackState.Deleted">حذف شده</MudSelectItem>
+                </MudSelect>
+
+                <MudSelect Label="اولویت" @bind-Value="filter.Priorty">
+                    <MudSelectItem Value="Priority.All">همه</MudSelectItem>
+                    <MudSelectItem Value="Priority.Medium">معمولی</MudSelectItem>
+                    <MudSelectItem Value="Priority.High">بالا</MudSelectItem>
+                    <MudSelectItem Value="Priority.Low">پایین</MudSelectItem>
+                </MudSelect>
+
+                <MudAutocomplete T="string" Class="mt-3" Label="ایجاد توسط" CoerceText="false"
+                                 ResetValueOnEmptyText="true" />
+                <div class="d-flex">
+                    <MudSelect Class="my-3" T="string" @bind-Value="_expertName" Label="ارجاع به متخصص">
+                        @foreach (var item in ExpertList)
+                        {
+                            <MudSelectItem Value="@(item.FirstName+" "+item.LastName)">@item.FirstName @item.LastName</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudIconButton Icon="@Icons.Material.Filled.PersonSearch" Color="Color.Primary" Edge="Edge.End" OnClick="ChoiceExpert" />
+                </div>
+            </div>
+        </MudItem>
+        <MudItem md="2" xs=5 sm=5 Class="m-3">
+            <div class="row">
+                <MudAutocomplete T="string" Class="mt-3" Label="نوع مورد" CoerceText="false"
+                                 ResetValueOnEmptyText="true" />
+
+                <MudDatePicker @bind-Date="Created" PickerVariant="PickerVariant.Dialog" Style="font-family:Vazir"
+                               Culture="@PersianDatePicker.GetPersianCulture()" UseShortNames="false"
+                               TitleDateFormat="dddd, dd MMMM" Label="تاریخ ایجاد" />
+
+                <MudDatePicker @bind-Date="RespondDate" PickerVariant="PickerVariant.Dialog" Style="font-family:Vazir"
+                               Culture="@PersianDatePicker.GetPersianCulture()" UseShortNames="false"
+                               TitleDateFormat="dddd, dd MMMM" Label="تاریخ پاسخ" />
+                @*
+                <MudDatePicker @bind-Date="Updated" PickerVariant="PickerVariant.Dialog" Style="font-family:Vazir"
+                Culture="@PersianDatePicker.GetPersianCulture()" UseShortNames="false"
+                TitleDateFormat="dddd, dd MMMM" Label="تاریخ ویرایش" />
+                *@
+                <MudAutocomplete T="string" Class="mt-3" Label="اصلاح توسط" CoerceText="false"
+                                 ResetValueOnEmptyText="true" />
+
+                <div class="d-flex">
+                    <MudSelect @bind-Value="_expertGroupName" Class="my-3" T="string" Label="گروه متخصصین">
+                        @foreach (var item in specialties)
+                        {
+                            <MudSelectItem Value="item.Title">@item.Title</MudSelectItem>
+                        }
+                    </MudSelect>
+                    <MudIconButton Icon="@Icons.Material.Filled.PersonSearch" Color="Color.Primary" Edge="Edge.End" OnClick="ChoiceExpertGroup" />
+
+                </div>
+            </div>
+        </MudItem>
+        <MudItem md="4" xs="5" sm="5" Class="m-3">
+            <MudTextField Class="mt-3" @bind-Value="@filter.Description" Label="شرح" Lines=4 Variant="Variant.Outlined"></MudTextField>
+            <MudTextField Class="mt-3" @bind-Value="@filter.Respond" Label="پاسخ" Lines=4 Variant="Variant.Outlined"></MudTextField>
+            <MudButton Class="mt-3" Variant="Variant.Filled" Color="Color.Primary" OnClick="GetReport">گزارش</MudButton>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+<MudRTLProvider RightToLeft=false>
+    <MudTable @ref=@_table T="FeedbackReport" Class="m-3" Items="@feedbackList" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading"
+              LoadingProgressColor="Color.Info"
+              ServerData="@(new Func<TableState, Task<TableData<FeedbackReport>>>(GetFeedbackReport))"
+              Striped="true" Elevation="2" RowsPerPage="10">
+        <HeaderContent>
+            <MudTh></MudTh>
+            <MudTh Style="text-align:center">آدرس</MudTh>
+            <MudTh Style="text-align:center">منشاء</MudTh>
+            <MudTh Style="text-align:center">عنوان</MudTh>
+            <MudTh Style="text-align:center">شماره سریال</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>
+                <MudTooltip Text="جزئیات">
+                    <MudIconButton Icon="@Icons.Material.Filled.Info" Color="Color.Info" OnClick="(()=>OpenFeedbackDetailsDialog(context.Id))"></MudIconButton>
+                </MudTooltip>
+            </MudTd>
+            <MudTd Style="text-align:center" DataLabel="آدرس">@context.SourceAddress</MudTd>
+            <MudTd Style="text-align:center" DataLabel="منشاء">@context.SourceTranslate</MudTd>
+            <MudTd Style="text-align:center" DataLabel="عنوان">@context.Title</MudTd>
+            <MudTd Style="text-align:center" DataLabel="شماره سریال">@context.SerialNumber</MudTd>
+        </RowTemplate>
+        <NoRecordsContent>
+            <MudText>داده ای یافت نشد</MudText>
+        </NoRecordsContent>
+        <PagerContent>
+            <MudTablePager HideRowsPerPage="true" HidePageNumber="true" PageSizeOptions="@_pageSizeOption" RowsPerPageString="تعداد ردیف" />
+        </PagerContent>
+    </MudTable>
+</MudRTLProvider>
